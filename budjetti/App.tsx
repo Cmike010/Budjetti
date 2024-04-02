@@ -2,16 +2,21 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider, useDispatch } from 'react-redux';
-import { store } from './Redux/store';
+import { AppDispatch, store } from './Redux/store';
+import { useEffect, useRef } from 'react';
+import { luoTaulut } from './Redux/budjettiSlice';
+//import Index from './app';
 
 const App : React.FC = () : React.ReactElement => {
-  return (
-    <SafeAreaProvider>
-      <Provider store={store}>
-        <Text>Testi</Text>
-      </Provider>
+  
 
-    </SafeAreaProvider>
+  return (
+    <Provider store={store}>
+      <SafeAreaProvider>
+        <View style={styles.container}>
+        </View>
+      </SafeAreaProvider>
+    </Provider>
   );
 }
 

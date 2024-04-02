@@ -1,30 +1,87 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import * as SQLite from 'expo-sqlite';
+import { useState } from "react";
 
-export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async () => {
 
-    const db : SQLite.SQLiteDatabase = SQLite.openDatabase("budjettikanta.db");
+const db = SQLite.openDatabase('budjettikanta.db');
 
-    // Asetetaan foreign_key päälle, jotta CASCADE poisto onnistuu
-    db.exec(
-    [{ sql: 'PRAGMA foreign_keys = ON;', args: [] }], 
-    false, 
-    () =>   console.log('Foreign keys turned on') 
-    )
+db.exec(
+    [{ sql: 'PRAGMA foreign_keys = ON;', args: [] }],
+    false,
+    () => {
+        console.log('Foreign keys turned on');
+    }
+);
 
+
+
+/*const avaaYhteys = async () : Promise<SQLite.SQLiteDatabase> => {
+
+    return new Promise((resolve, reject) => {
+        SQLite.openDatabase("budjettikanta.db", undefined, undefined, undefined, (db: SQLite.SQLiteDatabase) => {
+            // Asetetaan foreign-key päälle CASCADE poiston suorittamiseksi.
+            db.exec(
+                [{ sql: 'PRAGMA foreign_keys = ON;', args: [] }],
+                false,
+                () => {
+                    console.log('Foreign keys turned on');
+                    resolve(db);
+                }
+            );
+        });
+    });*/
+
+    /*const db = await SQLite.openDatabase("budjettikanta.db");
+    
+    //Asetetaan foreign-key päälle CASCADE poiston suorittamiseksi.
+    try {
+           db.exec(
+                [{ sql: 'PRAGMA foreign_keys = ON;', args: [] }],
+                false,
+                () => {
+                    console.log('Foreign keys turned on');
+                }
+            );
+        ;
+        return db;
+    } catch (error) {
+        console.error('Virhe avattaessa tietokantayhteyttä:', error);
+        throw error; // Heitetään virhe ylemmälle tasolle käsittelyä varten
+    }
+};*/
+
+const suljeYhteys = (db : SQLite.SQLiteDatabase) => {
+    db.closeAsync();
+}
+
+export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
+
+   
+    //const db = await avaaYhteys();
+    
     // Luodaan taulut
+    return new Promise<void>((resolve, reject) => {
     db.transaction(
+
+        
         (tx : SQLite.SQLTransaction) => {
+
     tx.executeSql(`
     CREATE TABLE IF NOT EXISTS budjetit (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       nimi TEXT
-    );`)
+    );`),
+    (err : SQLite.SQLError) => {
+        reject(err)
+    }
 
     tx.executeSql(`CREATE TABLE IF NOT EXISTS luokat (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       nimi TEXT
-    )`)
+    )`),
+    (err : SQLite.SQLError) => {
+        reject(err)
+    }
 
     tx.executeSql(`CREATE TABLE IF NOT EXISTS budjetti (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,7 +92,172 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async () => {
       toteuma REAL,
       FOREIGN KEY (budjetitId) REFERENCES budjetit(id) ON DELETE CASCADE,
       FOREIGN KEY (luokkaId) REFERENCES luokat(id)
-    )`)
+    )`),
+    (err : SQLite.SQLError) => {
+        reject(err)
+    }
+    
+    },
+    (err : SQLite.SQLError) => {
+        console.log("Virhe: " + err);
+    },
+    () => {
+        console.log("Taulut luotiin onnistuneesti!")
+        resolve();
+        //suljeYhteys(db);
+    }
+    )})});
+
+    export const haeTaulut = createAsyncThunk("budjetit/haeTaulut", async () => {
+
+        let taulut : any = [];
+
+        try {
+            
+            const promise1 = new Promise<void>((resolve, reject) => { db.transaction(
+                (tx : SQLite.SQLTransaction) => {
+                    tx.executeSql(`SELECT * FROM budjetit`, [],
+                    (_tx : SQLite.SQLTransaction, rs : SQLite.SQLResultSet) => {
+                        taulut = [...taulut, rs.rows._array];
+                        resolve()
+                    },
+                    
+                    (_tx : SQLite.SQLTransaction, error : SQLite.SQLError) => {
+                        console.error('Virhe SQL-lausekkeen suorituksessa:', error);
+                        reject(error);
+                        return true // Keskeytä transaktio virheen sattuessa
+                    });
+                },
+
+                
+                (_error) => {
+                    console.error('Virhe transaktiossa:', _error);
+                }
+            )});
+
+            const promise2 = new Promise<void>((resolve, reject) => { db.transaction(
+                (tx : SQLite.SQLTransaction) => {
+                    tx.executeSql(`SELECT * FROM luokat`, [],
+                    (_tx : SQLite.SQLTransaction, rs : SQLite.SQLResultSet) => {
+                        taulut = [...taulut, rs.rows._array];
+                        resolve();
+                    },
+                    
+                    (_tx : SQLite.SQLTransaction, error : SQLite.SQLError) => {
+                        console.error('Virhe SQL-lausekkeen suorituksessa:', error);
+                        reject(error)
+                        return true; // Keskeytä transaktio virheen sattuessa
+                    });
+                },
+
+                
+                (_error) => {
+                    console.error('Virhe transaktiossa:', _error);
+                }
+            )});
+
+            const promise3 = new Promise<void>((resolve, reject) => {db.transaction(
+                    (tx : SQLite.SQLTransaction) => {
+                        tx.executeSql(`SELECT * FROM budjetti`, [],
+                        (_tx : SQLite.SQLTransaction, rs : SQLite.SQLResultSet) => {
+                            taulut = [...taulut, rs.rows._array];
+                            resolve()
+                        },
+                        
+                        (_tx : SQLite.SQLTransaction, error : SQLite.SQLError) => {
+                            console.error('Virhe SQL-lausekkeen suorituksessa:', error);
+                            reject(error);
+                            return true; // Keskeytä transaktio virheen sattuessa
+                        });
+                    },
+
+                    
+                    (_error) => {
+                        console.error('Virhe transaktiossa:', _error);
+                    }
+                )});
+            
+            await Promise.all([promise1, promise2, promise3])
+                console.log("Taulut haettu onnistuneesti!");
+                console.log(taulut)
+                return taulut;
+            
+    
+            
+        } catch (error) {
+            console.error('Virhe taulujen hakemisessa:', error);
+            throw error;
+        }
+    })
+    
+   /*export const haeTaulut = createAsyncThunk("budjetit/haeTaulut", async () => {
+    
+    //const db = await avaaYhteys();
+    const taulut : any = []
+
+    const budjetit : any = [], luokat : any  = [], budjetti : any = []
+    let myPromise = new Promise((myResolve, myReject) => { db.transaction(
+        (tx : SQLite.SQLTransaction) => {
+            tx.executeSql(`SELECT * FROM budjetit`, [],
+            (_tx : SQLite.SQLTransaction, rs : SQLite.SQLResultSet) => {
+                budjetit.push(rs.rows._array);
+            })
+
+            tx.executeSql(`SELECT * FROM luokat`, [],
+            (_tx : SQLite.SQLTransaction, rs : SQLite.SQLResultSet) => {
+                luokat.push(rs.rows._array);
+            })
+
+            tx.executeSql(`SELECT * FROM budjetti`, [],
+            (_tx : SQLite.SQLTransaction, rs : SQLite.SQLResultSet) => {
+                budjetti.push(rs.rows._array);
+            })
+        },
+        (err : SQLite.SQLError) => {
+            console.log("Virhe: " + err);
+            },
+            () => {
+            myResolve(console.log("ok"));
+        }
+    )})
+    myPromise.then(() => {
+        
+        taulut.push(budjetit, luokat, budjetti)
+        console.log("Tässä taulut: " + JSON.stringify(taulut));
+        //suljeYhteys(db);
+    })
+   }) */
+
+    export const budjettiSlice = createSlice({
+
+        name : 'budjetit',
+        initialState : {
+            budjetit : [],
+            luokat : [],
+            budjetti : []
+        } as State,
+        reducers : {
+
+        },
+        extraReducers : (builder : any) => {
+            builder.addCase(luoTaulut.fulfilled, (state : State, action : PayloadAction) => {
+                console.log("Taulut luotu fulfilled")
+            }).addCase(haeTaulut.fulfilled, (state : State, action : PayloadAction<BudjetitPayload[]>) => {
+                console.log("Payload: " + JSON.stringify(action.payload[0]))
+                console.log("Taulut haettu fulfilled")
+                state.budjetit = action.payload[0]
+                state.luokat = action.payload[1]
+                state.budjetti = action.payload[2]
+                console.log("State asetettu")
+                console.log("Tila: " + JSON.stringify(state))
+            })
+        }
+    });
+
+    export const {  } = budjettiSlice.actions;
+    export default budjettiSlice.reducer;
+
+
 
     // Poista taulut
     /*tx.executeSql(`
@@ -70,8 +292,8 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async () => {
       ("Vuokra", 1, 2, 850, 840),
       ("Bensa", 2, 3, 260, 220.80),
       ("Renkaat",3,3,700,650),
-      ("Sähkö",2,3,150,240.80),
-      ("Hesburger",2,2,20,14.30)
+      ("Sähkö",2,2,150,240.80),
+      ("Hesburger",2,1,20,14.30)
       `)*/
     
     // Tulostaa taulujen sisällöt  
@@ -87,38 +309,3 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async () => {
     (_tx : SQLite.SQLTransaction, rs : SQLite.SQLResultSet) => {
       console.log(rs.rows._array);
     })*/
-    }),
-    (err : SQLite.SQLError) => {
-        console.log(err);
-    },
-    () => {
-        console.log("Taulut luotiin onnistuneesti!")
-    }
-    }) ;
-
-    export const budjettiSlice = createSlice({
-
-        name : 'budjetit',
-        initialState : {
-            db : [],
-            budjetit : [],
-            luokat : [],
-            budjetti : []
-        } as State,
-        reducers : {
-
-        },
-        extraReducers : (builder : any) => {
-            builder.addCase(luoTaulut.fulfilled, (state : State, action : PayloadAction) => {
-
-            })
-        }
-    })
-
-    export const {  } = budjettiSlice.actions;
-    export default budjettiSlice.reducer;
-
-
-
-
-

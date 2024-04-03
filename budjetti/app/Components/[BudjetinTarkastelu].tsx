@@ -1,8 +1,8 @@
 import { useLocalSearchParams } from "expo-router";
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { useSelector } from "react-redux";
 import { RootState } from "../../Redux/store";
-import { DataTable } from "react-native-paper";
+import { Button, DataTable } from "react-native-paper";
 
 const BudjetinTarkastelu : React.FC = () : React.ReactElement => {
 
@@ -10,6 +10,26 @@ const BudjetinTarkastelu : React.FC = () : React.ReactElement => {
 
     const taulut =  useSelector((state : RootState) => state.budjetit)
     console.log(Number(id))
+
+    const arviotYhteensa = () : number => {
+        let summa = 0;
+
+        taulut.budjetti.map((budjetti : any) => {
+            budjetti.budjetitId === Number(id) ? summa += budjetti.arvio : null
+        })
+        return Number(summa.toFixed(2));
+    }
+
+    const toteutunutYhteensa = () : number => {
+        let summa = 0;
+
+        taulut.budjetti.map((budjetti : any) => {
+            budjetti.budjetitId === Number(id) ? summa += budjetti.toteuma : null
+            console.log(summa)
+        })
+        return Number(summa.toFixed(2));
+    }
+
     return (
 
         <View>
@@ -37,10 +57,24 @@ const BudjetinTarkastelu : React.FC = () : React.ReactElement => {
                         )
                     }
                 })} 
+                <DataTable.Row style={{borderTopWidth : 1, borderTopColor : 'black'}}>
+                    <DataTable.Cell textStyle={{fontWeight: 'bold'}}>Yhteensä</DataTable.Cell>
+                    <DataTable.Cell> </DataTable.Cell>
+                    <DataTable.Cell>{arviotYhteensa()}</DataTable.Cell>
+                    <DataTable.Cell>{toteutunutYhteensa()}</DataTable.Cell>
+                </DataTable.Row>
             </DataTable>
+            <Button mode="contained" style={styles.button}>Lisää rivi</Button>
+            <Button mode="contained" style={styles.button}>Lisää luokka</Button>
         </View>
 
     )
 }
+
+const styles = StyleSheet.create({
+    button: {
+      margin : 5
+    }
+  });
 
 export default BudjetinTarkastelu;

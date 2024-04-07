@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Provider } from "react-redux";
 import { AppDispatch, store } from '../Redux/store';
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import BudjetinTarkastelu from "./Components/[Id]BudjetinTarkastelu";
 
 const RootLayout = () => {
   return (
@@ -26,9 +27,15 @@ const RootLayout = () => {
                   }}
               />
               <Stack.Screen
-                  name="Components/[BudjetinTarkastelu]"
+                  name="Components/[Id]BudjetinTarkastelu"
                   options={{
                     headerTitle: "Budjetin tarkastelu"
+                  }}
+              />
+              <Stack.Screen
+                  name="Components/[Id]LisaaRiviBudjettiin"
+                  options={{
+                    headerTitle: "Lisää rivi"
                   }}
               />
             </Stack>

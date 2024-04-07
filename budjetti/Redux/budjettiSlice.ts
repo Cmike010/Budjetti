@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction, AsyncThunkAction } from "@reduxjs/toolkit";
 import * as SQLite from 'expo-sqlite';
 import { useState } from "react";
 
@@ -13,50 +13,49 @@ db.exec(
     }
 );
 
+/*db.transaction(
+    (tx : SQLite.SQLTransaction) => {
+tx.executeSql(`
+    DROP TABLE IF EXISTS budjetit
+    `)
+    tx.executeSql(`
+    DROP TABLE IF EXISTS luokat
+    `)
+    tx.executeSql(`
+    DROP TABLE IF EXISTS budjetti
+    `)
+})*/
 
+/*db.transaction(
+    (tx : SQLite.SQLTransaction) => {
+        tx.executeSql(`INSERT INTO budjetit (nimi)
+    VALUES
+      ("Eka Budjetti"),
+      ("Toka Budjetti"),
+      ("Kolmas Budjetti")
+      `)
 
-/*const avaaYhteys = async () : Promise<SQLite.SQLiteDatabase> => {
-
-    return new Promise((resolve, reject) => {
-        SQLite.openDatabase("budjettikanta.db", undefined, undefined, undefined, (db: SQLite.SQLiteDatabase) => {
-            // Asetetaan foreign-key päälle CASCADE poiston suorittamiseksi.
-            db.exec(
-                [{ sql: 'PRAGMA foreign_keys = ON;', args: [] }],
-                false,
-                () => {
-                    console.log('Foreign keys turned on');
-                    resolve(db);
-                }
-            );
-        });
-    });*/
-
-    /*const db = await SQLite.openDatabase("budjettikanta.db");
-    
-    //Asetetaan foreign-key päälle CASCADE poiston suorittamiseksi.
-    try {
-           db.exec(
-                [{ sql: 'PRAGMA foreign_keys = ON;', args: [] }],
-                false,
-                () => {
-                    console.log('Foreign keys turned on');
-                }
-            );
-        ;
-        return db;
-    } catch (error) {
-        console.error('Virhe avattaessa tietokantayhteyttä:', error);
-        throw error; // Heitetään virhe ylemmälle tasolle käsittelyä varten
+    tx.executeSql(`INSERT INTO luokat (nimi)
+    VALUES
+      ("Ei valittu"),
+      ("Ruoka"),
+      ("Asumiskulut"),
+      ("Auto")
+      `)
+    tx.executeSql(`INSERT INTO budjetti (nimi, budjetitId, luokkaId, arvio, toteuma)
+    VALUES
+      ("Maito", 1, 2, 20.50, 10),
+      ("Vuokra", 1, 3, 850, 840),
+      ("Bensa", 2, 4, 260, 220.80),
+      ("Renkaat",3,4,700,650),
+      ("Sähkö",2,3,150,240.80),
+      ("Hesburger",2,2,20,14.30)
+      `)
     }
-};*/
-
-const suljeYhteys = (db : SQLite.SQLiteDatabase) => {
-    db.closeAsync();
-}
+)*/
 
 export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
 
-   
     //const db = await avaaYhteys();
     
     // Luodaan taulut
@@ -96,7 +95,6 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
     (err : SQLite.SQLError) => {
         reject(err)
     }
-    
     },
     (err : SQLite.SQLError) => {
         console.log("Virhe: " + err);
@@ -189,6 +187,28 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
             throw error;
         }
     })
+
+
+    export const tallennaBudjettiRivi = createAsyncThunk(
+        "budjetit/tallennaBudjettiRivi",
+        async (payload : any) => {
+          console.log("Slicesta päivää: " + JSON.stringify(payload));
+        
+        try {
+            await new Promise((resolve,reject) => { db.transaction(
+                (tx : SQLite.SQLTransaction) => {
+                    tx.executeSql(`
+                    INSERT INTO budjetti (nimi, budjetitId, luokkaId, arvio, toteuma) VALUES (?, ?, ?, ?, ?)
+                    `,
+                    [payload.nimi, payload.budjettiId, Number(payload.luokkaId.id), payload.arvio, payload.toteuma]
+                )
+                },
+                (err : SQLite.SQLError) => {console.log("KISSA " + err); reject(err)},
+                () => {console.log("LISÄTTY"); resolve}
+            )
+            })
+        } catch (e){ console.log(e); throw e}
+    });
     
    /*export const haeTaulut = createAsyncThunk("budjetit/haeTaulut", async () => {
     
@@ -250,6 +270,8 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
                 state.budjetti = action.payload[2]
                 console.log("State asetettu")
                 console.log("Tila: " + JSON.stringify(state))
+            }).addCase(tallennaBudjettiRivi.fulfilled, (state : State, action : PayloadAction<any>) => {
+                console.log(state.budjetti);
             })
         }
     });

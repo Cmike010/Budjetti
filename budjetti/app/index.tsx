@@ -61,7 +61,7 @@ const Index : React.FC = () : React.ReactElement => {
                   mode='contained'
                   onPress={() => 
                     router.push({
-                      pathname: "/Components/[BudjetinTarkastelu]",
+                      pathname: "/Components/[Id]BudjetinTarkastelu",
                       params: { id : budjetti.id}
                     })
                   }
@@ -70,6 +70,7 @@ const Index : React.FC = () : React.ReactElement => {
             )
           })}
           <Button onPress={tulosta}>Paina</Button>
+          <Button style={styles.button}>Lisää budjetti</Button>
         </View>
     )
 }

@@ -1,15 +1,17 @@
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { View, Text, StyleSheet } from "react-native";
 import { useSelector } from "react-redux";
 import { RootState } from "../../Redux/store";
 import { Button, DataTable } from "react-native-paper";
+import { useState } from "react";
 
 const BudjetinTarkastelu : React.FC = () : React.ReactElement => {
 
     const { id } = useLocalSearchParams<{ id : string }>();
 
     const taulut =  useSelector((state : RootState) => state.budjetit)
-    console.log(Number(id))
+
+    const [riviLisatty, setRiviLisatty] = useState<boolean>(false)
 
     const arviotYhteensa = () : number => {
         let summa = 0;
@@ -25,10 +27,28 @@ const BudjetinTarkastelu : React.FC = () : React.ReactElement => {
 
         taulut.budjetti.map((budjetti : any) => {
             budjetti.budjetitId === Number(id) ? summa += budjetti.toteuma : null
-            console.log(summa)
         })
         return Number(summa.toFixed(2));
     }
+
+    /*const navigoi = () => {
+
+        if (!riviLisatty){
+            setRiviLisatty(true);
+            router.push({
+                pathname: "/Components/[Id]LisaaRiviBudjettiin",
+                params: { id : id}
+              })
+        }
+
+        else {
+            setRiviLisatty(false);
+            router.push({
+                pathname: "/",
+              })
+        }
+    }*/
+
 
     return (
 
@@ -43,8 +63,6 @@ const BudjetinTarkastelu : React.FC = () : React.ReactElement => {
                 </DataTable.Header>
                 {taulut.budjetti.map((budjetti : any, idx : number) => {
                     if (budjetti.budjetitId === Number(id)) {
-                        console.log("LuokkaId: " + budjetti.luokkaId)
-                        console.log(budjetti.luokkaId)
                         return (
                             <DataTable.Row key={idx}>
                                 <DataTable.Cell>{budjetti.nimi}</DataTable.Cell>
@@ -64,7 +82,14 @@ const BudjetinTarkastelu : React.FC = () : React.ReactElement => {
                     <DataTable.Cell>{toteutunutYhteensa()}</DataTable.Cell>
                 </DataTable.Row>
             </DataTable>
-            <Button mode="contained" style={styles.button}>Lisää rivi</Button>
+            <Button
+                  style={styles.button} 
+                  mode='contained'
+                  onPress={() => router.replace({
+                    pathname: "/Components/[Id]LisaaRiviBudjettiin",
+                    params: { id : id}
+                  })}
+                  >Lisää rivi</Button>
             <Button mode="contained" style={styles.button}>Lisää luokka</Button>
         </View>
 

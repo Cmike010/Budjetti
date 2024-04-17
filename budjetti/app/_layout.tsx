@@ -4,11 +4,13 @@ import { Provider } from "react-redux";
 import { AppDispatch, store } from '../Redux/store';
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import BudjetinTarkastelu from "./Components/[Id]BudjetinTarkastelu";
+import { PaperProvider } from "react-native-paper";
 
 const RootLayout = () => {
   return (
     <Provider store={store}>
         <SafeAreaProvider>
+          <PaperProvider>
             <Stack
               screenOptions={{
                 headerStyle: {
@@ -38,7 +40,26 @@ const RootLayout = () => {
                     headerTitle: "Lisää rivi"
                   }}
               />
+              <Stack.Screen
+                  name="Components/[Id]MuokkaaLuokkia"
+                  options={{
+                    headerTitle: "Muokkaa luokkia"
+                  }}
+              />
+              <Stack.Screen
+                  name="Components/[Id]LisaaLuokka"
+                  options={{
+                    headerTitle: "Lisää Luokka"
+                  }}
+              />
+              <Stack.Screen
+                  name="Components/[Id]MuokkaaPoista"
+                  options={{
+                    headerTitle: "Muokkaa tai Poista"
+                  }}
+              />
             </Stack>
+            </PaperProvider>
         </SafeAreaProvider>
     </Provider>
   );

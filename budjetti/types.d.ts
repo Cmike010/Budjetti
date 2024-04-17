@@ -1,11 +1,12 @@
 interface State {
-    budjetit : any,
-    luokat : any,
+    budjetit : any
+    luokat : any
     budjetti : any
+    luokanPoistoDialog : boolean
 }
 
 interface BudjetitPayload {
     budjetit : {id : number, nimi : string}[];
     luokat : any[];
-    budjetti : any[]
+    budjetti : any[];
 }[]

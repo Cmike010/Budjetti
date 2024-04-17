@@ -7,6 +7,7 @@ import { TextInput, Text, Button } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../Redux/store';
 import { haeTaulut, tallennaBudjettiRivi } from '../../Redux/budjettiSlice';
+import VahvistaPoistoDialog from './VahvistaPoistoDialog';
 
 interface Value {
 
@@ -116,11 +117,21 @@ const LisaaRiviBudjettiin : React.FC = () : React.ReactElement => {
         dispatch(tallennaBudjettiRivi(uusiBudjettiRivi));
         dispatch(haeTaulut());
 
-      router.replace({
+      /*router.replace({
         pathname: "/Components/[Id]BudjetinTarkastelu",
         params: { id : id }
-      })
+      })*/
+
+      router.dismiss(1);
       }
+    }
+
+    const muokkaaLuokkia = () => {
+
+      router.push({
+        pathname: "/Components/[Id]MuokkaaLuokkia",
+        //params: { id : id }
+      })
     }
 
   return (
@@ -173,7 +184,10 @@ const LisaaRiviBudjettiin : React.FC = () : React.ReactElement => {
                   vaihda(item);
                 }}
               />
-        <Button style={styles.button} mode='contained' onPress={lisaaRivi}>Lisää</Button>
+        <Button style={styles.button} mode='contained' onPress={lisaaRivi}>Lisää rivi</Button>
+        <Button style={styles.button} mode='contained' onPress={muokkaaLuokkia}>Muokkaa luokkia</Button>
+        
+        
     </View>
   )
 }

@@ -85,7 +85,7 @@ const BudjetinTarkastelu : React.FC = () : React.ReactElement => {
             <Button
                   style={styles.button} 
                   mode='contained'
-                  onPress={() => router.replace({
+                  onPress={() => router.push({
                     pathname: "/Components/[Id]LisaaRiviBudjettiin",
                     params: { id : id}
                   })}

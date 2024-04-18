@@ -7,7 +7,7 @@ import { TextInput, Text, Button, useTheme } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../Redux/store';
 import { haeTaulut, tallennaBudjettiRivi, lisaaBudjetti } from '../../Redux/budjettiSlice';
-import VahvistaPoistoDialog from './VahvistaPoistoDialog';
+import VahvistaPoistoDialog from './VahvistaLuokanPoistoDialog';
 
 interface Values {
 

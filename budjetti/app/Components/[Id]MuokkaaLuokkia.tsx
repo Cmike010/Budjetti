@@ -63,7 +63,7 @@ const muokkaaTaiPoista = () => {
   setValues({...values, virhe : ""})
   if (values.id > 0){
     router.push({
-      pathname: "/Components/[Id]MuokkaaPoista",
+      pathname: "/Components/[Id]MuokkaaPoistaLuokka",
       params : { id : values.id}
     })
     setValues({id : NaN, nimi : "", virhe : ""})

@@ -3,6 +3,7 @@ interface State {
     luokat : any
     budjetti : any
     luokanPoistoDialog : boolean
+    budjetinPoistoDialog : boolean
 }
 
 interface BudjetitPayload {

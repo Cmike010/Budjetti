@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../Redux/store";
 import { Button, DataTable, TextInput, Text } from "react-native-paper";
 import { useState } from "react";
-import VahvistaPoistoDialog from "./VahvistaPoistoDialog";
+import VahvistaLuokanPoistoDialog from "./VahvistaLuokanPoistoDialog";
 import { luokanPoistoDialog } from "../../Redux/budjettiSlice";
 
 const MuokkaaPoista : React.FC = () : React.ReactElement => {
@@ -38,7 +38,7 @@ const MuokkaaPoista : React.FC = () : React.ReactElement => {
             <Button mode="contained" style={styles.button} onPress={() => dispatch(luokanPoistoDialog(true))}>Poista luokka</Button>
             {(Boolean(luokanPoistoDialogi))
             ? <View>
-                <VahvistaPoistoDialog id={Number(id)}/>
+                <VahvistaLuokanPoistoDialog id={Number(id)}/>
               </View>
             : null
             }

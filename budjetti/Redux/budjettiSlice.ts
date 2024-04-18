@@ -290,6 +290,35 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
         }
     )
 
+    export const poistaBudjetti = createAsyncThunk(
+        "budjetit/poistaBudjetti",
+        async (payload : number) => {
+            console.log("POISTETAAN...")
+            try {
+                await new Promise((resolve, reject) => {
+                    db.transaction(
+                        (tx : SQLite.SQLTransaction) => {
+                            tx.executeSql(`
+                            DELETE FROM budjetit
+                            WHERE id = (?)
+                            `, [payload],
+                        () => {
+                            console.log("Budjetti poistettu onnistuneesti");
+                            resolve("OK");
+                        }),
+                        (err : SQLite.SQLError) => {
+                            console.log("Budjetin poisto ei onnistunut " + err);
+                            reject();
+                        }
+                        
+                        }
+                    )
+                })
+            }
+            catch (e) {console.log(e)}
+        }
+    )
+
     export const budjettiSlice = createSlice({
 
         name : 'budjetit',
@@ -297,11 +326,15 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
             budjetit : [],
             luokat : [],
             budjetti : [],
-            luokanPoistoDialog : false
+            luokanPoistoDialog : false,
+            budjetinPoistoDialog : false
         } as State,
         reducers : {
             luokanPoistoDialog : (state : State, action : PayloadAction<boolean>) => {
                 state.luokanPoistoDialog = action.payload;
+            },
+            budjetinPoistoDialog : (state : State, action : PayloadAction<boolean>) => {
+                state.budjetinPoistoDialog = action.payload;
             }
         },
         extraReducers : (builder : any) => {
@@ -323,11 +356,13 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
             }).addCase(lisaaBudjetti.fulfilled, (payload : PayloadAction) => {
                 console.log("BUDJETTI LISÄTTY");
                 console.log(payload.payload);
+            }).addCase(poistaBudjetti.fulfilled, () => {
+                console.log("BUDJETTI POISTETTU")
             })
         }
     });
 
-    export const { luokanPoistoDialog } = budjettiSlice.actions;
+    export const { luokanPoistoDialog, budjetinPoistoDialog } = budjettiSlice.actions;
     export default budjettiSlice.reducer;
 
 

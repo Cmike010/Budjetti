@@ -10,7 +10,7 @@ interface Props {
     id : number
 }
 
-const VahvistaPoistoDialog : React.FC<Props> = (props : Props) : React.ReactElement => {
+const VahvistaLuokanPoistoDialog : React.FC<Props> = (props : Props) : React.ReactElement => {
 
 const dialogAuki = useSelector((state : RootState) => state.budjetit.luokanPoistoDialog)
 const luokat =  useSelector((state : RootState) => state.budjetit.luokat)
@@ -58,4 +58,4 @@ const styles = StyleSheet.create({
     
   });
 
-export default VahvistaPoistoDialog;
+export default VahvistaLuokanPoistoDialog;

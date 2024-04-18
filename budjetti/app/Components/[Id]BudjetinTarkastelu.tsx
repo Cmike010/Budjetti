@@ -1,15 +1,21 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { View, Text, StyleSheet } from "react-native";
-import { useSelector } from "react-redux";
-import { RootState } from "../../Redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../Redux/store";
 import { Button, DataTable } from "react-native-paper";
 import { useState } from "react";
+import { budjetinPoistoDialog, luokanPoistoDialog } from "../../Redux/budjettiSlice";
+import VahvistaLuokanPoistoDialog from "./VahvistaLuokanPoistoDialog";
+import VahvistaBudjetinPoistoDialog from "./VahvistaBudjetinPoistoDialog";
+
 
 const BudjetinTarkastelu : React.FC = () : React.ReactElement => {
 
     const { id } = useLocalSearchParams<{ id : string }>();
 
     const taulut =  useSelector((state : RootState) => state.budjetit)
+    const budjetinPoistoDialogi = useSelector((state : RootState) => state.budjetit.budjetinPoistoDialog)
+    const dispatch = useDispatch<AppDispatch>()
 
     const [riviLisatty, setRiviLisatty] = useState<boolean>(false)
 
@@ -31,29 +37,15 @@ const BudjetinTarkastelu : React.FC = () : React.ReactElement => {
         return Number(summa.toFixed(2));
     }
 
-    /*const navigoi = () => {
-
-        if (!riviLisatty){
-            setRiviLisatty(true);
-            router.push({
-                pathname: "/Components/[Id]LisaaRiviBudjettiin",
-                params: { id : id}
-              })
-        }
-
-        else {
-            setRiviLisatty(false);
-            router.push({
-                pathname: "/",
-              })
-        }
-    }*/
-
-
+    const poista = () => {
+        dispatch(budjetinPoistoDialog(true));
+        console.log(budjetinPoistoDialogi)
+    }
+    console.log("ID " + id )
     return (
 
         <View>
-            <Text>{taulut.budjetit[Number(id) -1 ].nimi}</Text>
+            <Text>{taulut.budjetit.find((item : any) => Number(id) === item.id)?.nimi}</Text>
             <DataTable>
                 <DataTable.Header>
                     <DataTable.Title>Nimi</DataTable.Title>
@@ -91,6 +83,13 @@ const BudjetinTarkastelu : React.FC = () : React.ReactElement => {
                   })}
                   >Lisää rivi</Button>
             <Button mode="contained" style={styles.button}>Lisää luokka</Button>
+            <Button mode="contained" style={styles.buttonDanger} onPress={() => dispatch(budjetinPoistoDialog(true))}>Poista koko budjetti</Button>
+            {(Boolean(budjetinPoistoDialogi))
+            ? <View>
+                <VahvistaBudjetinPoistoDialog id={Number(id)}/>
+              </View>
+            : null
+            }
         </View>
 
     )
@@ -99,6 +98,11 @@ const BudjetinTarkastelu : React.FC = () : React.ReactElement => {
 const styles = StyleSheet.create({
     button: {
       margin : 5
+    },
+    buttonDanger: {
+      backgroundColor : "red",
+      margin : 5,
+      marginTop : 20
     }
   });
 

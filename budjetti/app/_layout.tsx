@@ -53,7 +53,7 @@ const RootLayout = () => {
                   }}
               />
               <Stack.Screen
-                  name="Components/[Id]MuokkaaPoista"
+                  name="Components/[Id]MuokkaaPoistaLuokka"
                   options={{
                     headerTitle: "Muokkaa tai Poista"
                   }}

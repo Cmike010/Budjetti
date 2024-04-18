@@ -7,7 +7,7 @@ import { TextInput, Text, Button } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../Redux/store';
 import { haeTaulut, tallennaBudjettiRivi } from '../../Redux/budjettiSlice';
-import VahvistaPoistoDialog from './VahvistaPoistoDialog';
+import VahvistaPoistoDialog from './VahvistaLuokanPoistoDialog';
 
 interface Value {
 
@@ -186,7 +186,6 @@ const LisaaRiviBudjettiin : React.FC = () : React.ReactElement => {
               />
         <Button style={styles.button} mode='contained' onPress={lisaaRivi}>Lisää rivi</Button>
         <Button style={styles.button} mode='contained' onPress={muokkaaLuokkia}>Muokkaa luokkia</Button>
-        
         
     </View>
   )

@@ -60,8 +60,6 @@ tx.executeSql(`
 
 export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
 
-    //const db = await avaaYhteys();
-    
     // Luodaan taulut
     return new Promise<void>((resolve, reject) => {
     db.transaction(
@@ -73,18 +71,12 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
     CREATE TABLE IF NOT EXISTS budjetit (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       nimi TEXT
-    );`),
-    (err : SQLite.SQLError) => {
-        reject(err)
-    }
+    );`)
 
     tx.executeSql(`CREATE TABLE IF NOT EXISTS luokat (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       nimi TEXT
-    )`),
-    (err : SQLite.SQLError) => {
-        reject(err)
-    }
+    )`)
 
     tx.executeSql(`CREATE TABLE IF NOT EXISTS budjetti (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -95,19 +87,15 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
       toteuma REAL,
       FOREIGN KEY (budjetitId) REFERENCES budjetit(id) ON DELETE CASCADE,
       FOREIGN KEY (luokkaId) REFERENCES luokat(id)
-    )`),
-    (err : SQLite.SQLError) => {
-        console.error(err);
-        reject(err)
-    }
+    )`)
     },
     (err : SQLite.SQLError) => {
         console.log("Virhe: " + err);
+        reject();
     },
     () => {
         console.log("Taulut luotiin onnistuneesti!")
         resolve();
-        //suljeYhteys(db);
     }
     )})});
 
@@ -208,7 +196,7 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
                     [payload.nimi, payload.budjettiId, Number(payload.luokkaId.id), payload.arvio, payload.toteuma]
                 )
                 },
-                (err : SQLite.SQLError) => {console.log("KISSA " + err); reject(err)},
+                (err : SQLite.SQLError) => {console.log(err); reject(err)},
                 () => {console.log("LISÄTTY"); resolve}
             )
             })
@@ -221,7 +209,7 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
             console.log("Slicestä iltaa: " +JSON.stringify(payload));
 
             try {
-                await new Promise((resolve, reject) => {db.transaction(
+                await new Promise<void>((resolve, reject) => {db.transaction(
                     (tx : SQLite.SQLTransaction) => {
                         tx.executeSql(`
                         INSERT INTO luokat (nimi) VALUES (?)
@@ -230,10 +218,11 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
                     )
                     },
                     (err : SQLite.SQLError) => {console.log(err); reject(err)},
-                    (() => {console.log("Luokka lisätty onnistuneesti!")})
+                    (() => {console.log("Luokka lisätty onnistuneesti!"); resolve(); })
                 )})
+                
             } catch (e) { console.log(e); throw e}
-        }
+            }
     )
 
     export const poistaLuokka = createAsyncThunk(
@@ -277,90 +266,29 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
         }
     )
 
-    /*export const poistaLuokka = createAsyncThunk(
-        "budjetit/poistaLuokka",
-        async (luokkaId: number) => {
-            console.log("Luokan poisto id:lle " + luokkaId);
-    
+    export const lisaaBudjetti = createAsyncThunk(
+        "budjetit/lisaaBudjetti",
+        
+        async (payload : string) => {
+
             try {
                 await new Promise((resolve, reject) => {
+
                     db.transaction(
-                        (tx: SQLite.SQLTransaction) => {
-                            // Päivitä budjetti-taulun rivit, joissa luokkaId vastaa parametrina saatuun id:hen
-                            tx.executeSql(
-                                `
-                                UPDATE budjetti 
-                                SET luokkaId = 1 
-                                WHERE luokkaId = (?)
-                                `,
-                                [luokkaId],
-                                (_tx: SQLite.SQLTransaction, _rs: SQLite.SQLResultSet) => {
-                                    // Päivitys onnistui, jatketaan
-                                    console.log("Budjetti-taulun rivit päivitetty onnistuneesti.");
-                                }
-                            );
-    
-                            // Poista luokka luokat-taulusta
-                            tx.executeSql(
-                                `
-                                DELETE FROM luokat 
-                                WHERE id = (?)
-                                `,
-                                [luokkaId],
-                                (_tx: SQLite.SQLTransaction, _rs: SQLite.SQLResultSet) => {
-                                    // Poisto onnistui, ratkaistaan promise
-                                    console.log("Luokka poistettu onnistuneesti.");
-                                    resolve("ONNISTUI");
-                                }
-                            );
-                        }
-                    );
-                });
-            } catch (error) {
-                // Yleinen virheenkäsittely, tulostetaan virhe
-                console.error("Virhe suorittaessa transaktiota:", error);
-                throw error;
-            }
+                        (tx : SQLite.SQLTransaction) => {
+                            tx.executeSql(`
+                            INSERT INTO budjetit (nimi) VALUES (?)
+                            `,
+                            [payload]
+                        )
+                        },
+                        (err : SQLite.SQLError) => {console.log(err); reject(err)},
+                        () => { console.log("Budjetti lisätty onnistuneesti."); resolve("OK");}
+                    )
+                })
+            } catch (e) { console.log(e);}
         }
-    );*/
-    
-   /*export const haeTaulut = createAsyncThunk("budjetit/haeTaulut", async () => {
-    
-    //const db = await avaaYhteys();
-    const taulut : any = []
-
-    const budjetit : any = [], luokat : any  = [], budjetti : any = []
-    let myPromise = new Promise((myResolve, myReject) => { db.transaction(
-        (tx : SQLite.SQLTransaction) => {
-            tx.executeSql(`SELECT * FROM budjetit`, [],
-            (_tx : SQLite.SQLTransaction, rs : SQLite.SQLResultSet) => {
-                budjetit.push(rs.rows._array);
-            })
-
-            tx.executeSql(`SELECT * FROM luokat`, [],
-            (_tx : SQLite.SQLTransaction, rs : SQLite.SQLResultSet) => {
-                luokat.push(rs.rows._array);
-            })
-
-            tx.executeSql(`SELECT * FROM budjetti`, [],
-            (_tx : SQLite.SQLTransaction, rs : SQLite.SQLResultSet) => {
-                budjetti.push(rs.rows._array);
-            })
-        },
-        (err : SQLite.SQLError) => {
-            console.log("Virhe: " + err);
-            },
-            () => {
-            myResolve(console.log("ok"));
-        }
-    )})
-    myPromise.then(() => {
-        
-        taulut.push(budjetit, luokat, budjetti)
-        console.log("Tässä taulut: " + JSON.stringify(taulut));
-        //suljeYhteys(db);
-    })
-   }) */
+    )
 
     export const budjettiSlice = createSlice({
 
@@ -374,11 +302,10 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
         reducers : {
             luokanPoistoDialog : (state : State, action : PayloadAction<boolean>) => {
                 state.luokanPoistoDialog = action.payload;
-                console.log(state.luokanPoistoDialog)
             }
         },
         extraReducers : (builder : any) => {
-            builder.addCase(luoTaulut.fulfilled, (state : State, action : PayloadAction) => {
+            builder.addCase(luoTaulut.fulfilled, () => {
                 console.log("Taulut luotu fulfilled")
             }).addCase(haeTaulut.fulfilled, (state : State, action : PayloadAction<BudjetitPayload[]>) => {
                 console.log("Taulut haettu fulfilled")
@@ -387,13 +314,15 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
                 state.budjetti = action.payload[2];
                 console.log("State asetettu")
                 console.log("Tila: " + JSON.stringify(state))
-            }).addCase(tallennaBudjettiRivi.fulfilled, (state : State, action : PayloadAction<any>) => {
-                console.log(state.budjetti);
+            }).addCase(tallennaBudjettiRivi.fulfilled, () => {
+                console.log("Rivi tallennettu.")
             }).addCase(lisaaLuokka.fulfilled, (state : State, action : PayloadAction) => {
-                state.luokat = {...state.luokat, luokat : action.payload}
-                console.log(state.luokat);
-            }).addCase(poistaLuokka.fulfilled, (state : State, action : PayloadAction) => {
+                console.log("LUOKKA LISÄTTY ");
+            }).addCase(poistaLuokka.fulfilled, (state : State) => {
                 console.log(state.luokat)
+            }).addCase(lisaaBudjetti.fulfilled, (payload : PayloadAction) => {
+                console.log("BUDJETTI LISÄTTY");
+                console.log(payload.payload);
             })
         }
     });

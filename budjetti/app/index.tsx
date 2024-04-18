@@ -39,6 +39,14 @@ const Index : React.FC = () : React.ReactElement => {
     console.log("TULOSTETAAN TAULUT: " + JSON.stringify(taulut.budjetit[0].nimi))
   }
 
+  const lisaaBudjetti = () => {
+
+    router.push({
+      pathname: "/Components/LisaaBudjetti",
+      //params: { id : id }
+    })
+  }
+
   useEffect(() => {
     console.log("Taulujen tila päivittyi")
   },[taulut])
@@ -70,7 +78,7 @@ const Index : React.FC = () : React.ReactElement => {
             )
           })}
           <Button onPress={tulosta}>Paina</Button>
-          <Button style={styles.button}>Lisää budjetti</Button>
+          <Button style={styles.button} onPress={() => lisaaBudjetti()}>Lisää budjetti</Button>
         </View>
     )
 }

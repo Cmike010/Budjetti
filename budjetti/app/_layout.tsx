@@ -58,6 +58,12 @@ const RootLayout = () => {
                     headerTitle: "Muokkaa tai Poista"
                   }}
               />
+            <Stack.Screen
+                  name="Components/LisaaBudjetti"
+                  options={{
+                    headerTitle: "Lisää budjetti"
+                  }}
+              />
             </Stack>
             </PaperProvider>
         </SafeAreaProvider>

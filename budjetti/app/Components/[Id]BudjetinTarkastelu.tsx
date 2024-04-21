@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../Redux/store";
 import { Button, DataTable } from "react-native-paper";
@@ -7,6 +7,7 @@ import { useState } from "react";
 import { budjetinPoistoDialog, luokanPoistoDialog } from "../../Redux/budjettiSlice";
 import VahvistaLuokanPoistoDialog from "./VahvistaLuokanPoistoDialog";
 import VahvistaBudjetinPoistoDialog from "./VahvistaBudjetinPoistoDialog";
+import { Entypo } from '@expo/vector-icons';
 
 
 const BudjetinTarkastelu : React.FC = () : React.ReactElement => {
@@ -37,11 +38,14 @@ const BudjetinTarkastelu : React.FC = () : React.ReactElement => {
         return Number(summa.toFixed(2));
     }
 
-    const poista = () => {
-        dispatch(budjetinPoistoDialog(true));
-        console.log(budjetinPoistoDialogi)
+    const muokkaaRivi = (id : number) => {
+
+        router.push({
+            pathname: "/Components/[Id]MuokkaaBudjettiRivi",
+            params: { id : id}
+          })
     }
-    console.log("ID " + id )
+
     return (
 
         <View>
@@ -56,14 +60,16 @@ const BudjetinTarkastelu : React.FC = () : React.ReactElement => {
                 {taulut.budjetti.map((budjetti : any, idx : number) => {
                     if (budjetti.budjetitId === Number(id)) {
                         return (
-                            <DataTable.Row key={idx}>
-                                <DataTable.Cell>{budjetti.nimi}</DataTable.Cell>
-                                <DataTable.Cell>
-                                    {taulut.luokat.find((item: any) => item.id === budjetti.luokkaId)?.nimi}
-                                </DataTable.Cell>
-                                <DataTable.Cell>{budjetti.arvio}</DataTable.Cell>
-                                <DataTable.Cell>{budjetti.toteuma}</DataTable.Cell>
-                            </DataTable.Row>
+                            <Pressable key={idx} onPress={() => muokkaaRivi(budjetti.id)}>
+                                <DataTable.Row>
+                                    <DataTable.Cell>{budjetti.nimi}</DataTable.Cell>
+                                    <DataTable.Cell>
+                                        {taulut.luokat.find((item: any) => item.id === budjetti.luokkaId)?.nimi}
+                                    </DataTable.Cell>
+                                    <DataTable.Cell>{budjetti.arvio}</DataTable.Cell>
+                                    <DataTable.Cell>{budjetti.toteuma}</DataTable.Cell>
+                                </DataTable.Row>
+                            </Pressable>
                         )
                     }
                 })} 

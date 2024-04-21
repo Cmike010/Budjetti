@@ -319,6 +319,37 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
         }
     )
 
+    export const paivitaBudjettiRivi = createAsyncThunk(
+        "budjetit/paivitaBudjettiRivi",
+
+        async (payload : any) => {
+            try {
+
+                await new Promise((resolve, reject) => {
+
+                    db.transaction(
+                        (tx : SQLite.SQLTransaction) => {
+                            tx.executeSql(`
+                            
+                            UPDATE budjetti
+                            SET nimi = (?), luokkaId = (?), arvio = (?), toteuma = (?)
+                            WHERE id = (?)
+                            `,[payload.nimi, payload.luokkaId, payload.arvio, payload.toteuma, payload.id],() => {
+                                console.log("Päivitys onnistui!")
+                                resolve("Onnistui");
+                            })
+                        },
+                        (err : SQLite.SQLError) => {
+                            console.log("Päivitys ei onnistunut: " + err)
+                            reject();
+                        }
+                    )
+                })
+            }
+            catch (e) {console.log(e)}
+        }
+    )
+
     export const budjettiSlice = createSlice({
 
         name : 'budjetit',
@@ -358,6 +389,8 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
                 console.log(payload.payload);
             }).addCase(poistaBudjetti.fulfilled, () => {
                 console.log("BUDJETTI POISTETTU")
+            }).addCase(paivitaBudjettiRivi.fulfilled, () => {
+                console.log("BUDJETTIRIVI PÄIVITETTY!")
             })
         }
     });

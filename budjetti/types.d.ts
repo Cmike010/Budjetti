@@ -4,6 +4,7 @@ interface State {
     budjetti : any
     luokanPoistoDialog : boolean
     budjetinPoistoDialog : boolean
+    budjettiRivinPoistoDialog : boolean
 }
 
 interface BudjetitPayload {
@@ -11,3 +12,12 @@ interface BudjetitPayload {
     luokat : any[];
     budjetti : any[];
 }[]
+
+interface Budjetti {
+    id : number,
+    nimi : string,
+    budjettiId : number,
+    luokkaId : number,
+    arvio : number,
+    toteuma : number
+}

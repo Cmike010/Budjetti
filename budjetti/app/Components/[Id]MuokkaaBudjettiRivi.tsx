@@ -6,8 +6,9 @@ import { View, StyleSheet } from 'react-native';
 import { TextInput, Text, Button } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../Redux/store';
-import { haeTaulut, tallennaBudjettiRivi, paivitaBudjettiRivi } from '../../Redux/budjettiSlice';
+import { haeTaulut, tallennaBudjettiRivi, paivitaBudjettiRivi, budjettiRivinPoistoDialog } from '../../Redux/budjettiSlice';
 import VahvistaPoistoDialog from './VahvistaLuokanPoistoDialog';
+import VahvistaBudjettiRivinPoistoDialog from './VahvistaBudjettiRivinPoistoDialog';
 
 
 const MuokkaaBudjettiRivi : React.FC = () : React.ReactElement => {
@@ -112,6 +113,13 @@ const MuokkaaBudjettiRivi : React.FC = () : React.ReactElement => {
               />
         <Button style={styles.button} mode='contained' onPress={muokkaa}>Muokkaa</Button>
         <Button style={styles.button} mode='contained' onPress={router.back}>Takaisin</Button>
+        <Button mode="contained" style={styles.buttonDanger} onPress={() => dispatch(budjettiRivinPoistoDialog(true))}>Poista tämä rivi</Button>
+        {(Boolean(budjettiRivinPoistoDialog))
+            ? <View>
+                <VahvistaBudjettiRivinPoistoDialog id={Number(id)}/>
+              </View>
+            : null
+            }
         
     </View>
   )
@@ -144,6 +152,11 @@ const styles = StyleSheet.create({
   },
   button: {
     margin : 5
+  },
+  buttonDanger: {
+    backgroundColor : "red",
+    margin : 5,
+    marginTop : 20
   }
 })
 export default MuokkaaBudjettiRivi;

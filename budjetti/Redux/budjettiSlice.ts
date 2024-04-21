@@ -350,6 +350,35 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
         }
     )
 
+    export const poistaBudjettiRivi = createAsyncThunk(
+        "budjetit/poistaBudjettiRivi",
+
+        async (payload : number) => {
+
+            try {
+                await new Promise((resolve, reject) => {
+
+                    db.transaction(
+                        (tx : SQLite.SQLTransaction) => {
+                            tx.executeSql(`
+                            DELETE FROM budjetti
+                            WHERE id = (?)
+                            `,
+                        [payload],
+                        () => {console.log("Budjettirivi poistettu onnistuneesti!"); resolve("OK")}
+                        )
+                        },
+                        (err : SQLite.SQLError) => {
+                            console.log("Rivin poisto epäonnistui " + err);
+                            reject();
+                        }
+                    )
+                })
+            }
+            catch (e) {console.log("Virhe " + e)}
+        }
+    )
+
     export const budjettiSlice = createSlice({
 
         name : 'budjetit',
@@ -358,7 +387,8 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
             luokat : [],
             budjetti : [],
             luokanPoistoDialog : false,
-            budjetinPoistoDialog : false
+            budjetinPoistoDialog : false,
+            budjettiRivinPoistoDialog : false
         } as State,
         reducers : {
             luokanPoistoDialog : (state : State, action : PayloadAction<boolean>) => {
@@ -366,6 +396,9 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
             },
             budjetinPoistoDialog : (state : State, action : PayloadAction<boolean>) => {
                 state.budjetinPoistoDialog = action.payload;
+            },
+            budjettiRivinPoistoDialog : (state : State, action : PayloadAction<boolean>) => {
+                state.budjettiRivinPoistoDialog = action.payload;
             }
         },
         extraReducers : (builder : any) => {
@@ -391,11 +424,13 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
                 console.log("BUDJETTI POISTETTU")
             }).addCase(paivitaBudjettiRivi.fulfilled, () => {
                 console.log("BUDJETTIRIVI PÄIVITETTY!")
+            }).addCase(poistaBudjettiRivi.fulfilled, () => {
+                console.log("BUDJETTIRIVI POISTETTU!")
             })
         }
     });
 
-    export const { luokanPoistoDialog, budjetinPoistoDialog } = budjettiSlice.actions;
+    export const { luokanPoistoDialog, budjetinPoistoDialog, budjettiRivinPoistoDialog } = budjettiSlice.actions;
     export default budjettiSlice.reducer;
 
 

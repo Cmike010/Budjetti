@@ -158,6 +158,7 @@ const styles = StyleSheet.create({
       borderColor : "black",
       borderWidth : 1
   },
+  
   buttonDanger: {
     backgroundColor : "red",
     margin : 5,

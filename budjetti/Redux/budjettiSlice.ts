@@ -13,6 +13,9 @@ db.exec(
     }
 );
 
+
+////////////////////////// TAULUJEN POISTOA VARTEN //////////////////////
+
 /*db.transaction(
     (tx : SQLite.SQLTransaction) => {
 tx.executeSql(`
@@ -25,6 +28,8 @@ tx.executeSql(`
     DROP TABLE IF EXISTS budjetti
     `)
 })*/
+
+/////////////////////// TESTIDATAA TAULUIHIN ////////////////////////
 
 /*db.transaction(
     (tx : SQLite.SQLTransaction) => {
@@ -88,6 +93,14 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
       FOREIGN KEY (budjetitId) REFERENCES budjetit(id) ON DELETE CASCADE,
       FOREIGN KEY (luokkaId) REFERENCES luokat(id)
     )`)
+
+    tx.executeSql(`
+    INSERT INTO luokat (nimi)
+    SELECT * FROM (SELECT "Ei valittu") AS tmp
+    WHERE NOT EXISTS (
+        SELECT nimi FROM luokat WHERE nimi = "Ei valittu"
+    )
+    `);
     },
     (err : SQLite.SQLError) => {
         console.log("Virhe: " + err);
@@ -116,11 +129,9 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
                     (_tx : SQLite.SQLTransaction, error : SQLite.SQLError) => {
                         console.error('Virhe SQL-lausekkeen suorituksessa:', error);
                         reject(error);
-                        return true // Keskeytä transaktio virheen sattuessa
+                        return true 
                     });
                 },
-
-                
                 (_error) => {
                     console.error('Virhe transaktiossa:', _error);
                 }
@@ -137,11 +148,9 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
                     (_tx : SQLite.SQLTransaction, error : SQLite.SQLError) => {
                         console.error('Virhe SQL-lausekkeen suorituksessa:', error);
                         reject(error)
-                        return true; // Keskeytä transaktio virheen sattuessa
+                        return true; 
                     });
                 },
-
-                
                 (_error) => {
                     console.error('Virhe transaktiossa:', _error);
                 }
@@ -158,11 +167,9 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
                         (_tx : SQLite.SQLTransaction, error : SQLite.SQLError) => {
                             console.error('Virhe SQL-lausekkeen suorituksessa:', error);
                             reject(error);
-                            return true; // Keskeytä transaktio virheen sattuessa
+                            return true; 
                         });
                     },
-
-                    
                     (_error) => {
                         console.error('Virhe transaktiossa:', _error);
                     }
@@ -170,10 +177,7 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
             
             await Promise.all([promise1, promise2, promise3])
                 console.log("Taulut haettu onnistuneesti!");
-                console.log(taulut)
                 return taulut;
-            
-    
             
         } catch (error) {
             console.error('Virhe taulujen hakemisessa:', error);
@@ -185,7 +189,6 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
     export const tallennaBudjettiRivi = createAsyncThunk(
         "budjetit/tallennaBudjettiRivi",
         async (payload : any) => {
-          console.log("Slicesta päivää: " + JSON.stringify(payload));
         
         try {
             await new Promise((resolve,reject) => { db.transaction(
@@ -205,8 +208,7 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
 
     export const lisaaLuokka = createAsyncThunk(
         "budjetit/lisaaLuokka",
-        async (payload : any) => {
-            console.log("Slicestä iltaa: " +JSON.stringify(payload));
+        async (payload : string) => {
 
             try {
                 await new Promise<void>((resolve, reject) => {db.transaction(
@@ -239,8 +241,8 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
                         SET luokkaId = 1
                         WHERE luokkaId = (?)
                         `,[payload],
-                    (_tx : SQLite.SQLTransaction, rs : SQLite.SQLResultSet) => {
-                        console.log("PÄIVITYS ONNISTUI! " + console.log(rs.rows._array))
+                    () => {
+                        console.log("PÄIVITYS ONNISTUI! ")
                     }
                     );
 
@@ -249,7 +251,7 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
                         WHERE id = (?)
                         `,
                         [payload],
-                        (_tx: SQLite.SQLTransaction, rs : SQLite.SQLResultSet) => {
+                        () => {
 
                             console.log("Luokka poistettu onnistuneesti.");
                             haeTaulut();
@@ -293,7 +295,7 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
     export const poistaBudjetti = createAsyncThunk(
         "budjetit/poistaBudjetti",
         async (payload : number) => {
-            console.log("POISTETAAN...")
+
             try {
                 await new Promise((resolve, reject) => {
                     db.transaction(
@@ -310,7 +312,6 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
                             console.log("Budjetin poisto ei onnistunut " + err);
                             reject();
                         }
-                        
                         }
                     )
                 })
@@ -379,6 +380,33 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
         }
     )
 
+    export const vaihdaLuokanNimi = createAsyncThunk(
+        'budjetit/vaihdaLuokanNimi',
+        async (payload : Luokka) => {
+
+            await new Promise((resolve, reject) => {
+                db.transaction(
+                    (tx : SQLite.SQLTransaction) => {
+                        tx.executeSql(`
+                        UPDATE luokat
+                        SET NIMI = (?)
+                        WHERE id = (?)
+                        `, [payload.nimi, payload.id],
+                    () => {
+                        console.log("Luokan päivitys onnistui!");
+                        resolve("OK")
+                    }
+                    ),
+                    (err : SQLite.SQLError) => {
+                        console.log("Luokan päivitys ei onnistunut" + err)
+                        reject(err);
+                    }
+                    }
+                )
+            })
+        }
+    )
+
     export const budjettiSlice = createSlice({
 
         name : 'budjetit',
@@ -388,7 +416,8 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
             budjetti : [],
             luokanPoistoDialog : false,
             budjetinPoistoDialog : false,
-            budjettiRivinPoistoDialog : false
+            budjettiRivinPoistoDialog : false,
+            asetuksetDialog : false
         } as State,
         reducers : {
             luokanPoistoDialog : (state : State, action : PayloadAction<boolean>) => {
@@ -399,89 +428,37 @@ export const luoTaulut = createAsyncThunk("budjetit/luoTaulut", async() => {
             },
             budjettiRivinPoistoDialog : (state : State, action : PayloadAction<boolean>) => {
                 state.budjettiRivinPoistoDialog = action.payload;
-            }
+            },asetuksetDialog : (state : State, action : PayloadAction<boolean>) => {
+                state.asetuksetDialog = action.payload;
+            } 
         },
         extraReducers : (builder : any) => {
             builder.addCase(luoTaulut.fulfilled, () => {
                 console.log("Taulut luotu fulfilled")
-            }).addCase(haeTaulut.fulfilled, (state : State, action : PayloadAction<BudjetitPayload[]>) => {
+            }).addCase(haeTaulut.fulfilled, (state : State, action : PayloadAction<[Budjetit[],Luokka[],Budjetti[]]>) => {
                 console.log("Taulut haettu fulfilled")
                 state.budjetit = action.payload[0];
                 state.luokat = action.payload[1];
                 state.budjetti = action.payload[2];
-                console.log("State asetettu")
-                console.log("Tila: " + JSON.stringify(state))
             }).addCase(tallennaBudjettiRivi.fulfilled, () => {
-                console.log("Rivi tallennettu.")
-            }).addCase(lisaaLuokka.fulfilled, (state : State, action : PayloadAction) => {
+                console.log("Rivi tallennettu."); 
+            }).addCase(lisaaLuokka.fulfilled, () => {
                 console.log("LUOKKA LISÄTTY ");
-            }).addCase(poistaLuokka.fulfilled, (state : State) => {
-                console.log(state.luokat)
-            }).addCase(lisaaBudjetti.fulfilled, (payload : PayloadAction) => {
+            }).addCase(poistaLuokka.fulfilled, () => {
+                console.log("LUOKKA POISTETTU")
+            }).addCase(lisaaBudjetti.fulfilled, () => {
                 console.log("BUDJETTI LISÄTTY");
-                console.log(payload.payload);
             }).addCase(poistaBudjetti.fulfilled, () => {
                 console.log("BUDJETTI POISTETTU")
             }).addCase(paivitaBudjettiRivi.fulfilled, () => {
                 console.log("BUDJETTIRIVI PÄIVITETTY!")
             }).addCase(poistaBudjettiRivi.fulfilled, () => {
                 console.log("BUDJETTIRIVI POISTETTU!")
+            }).addCase(vaihdaLuokanNimi.fulfilled, () => {
+                console.log("LUOKAN NIMI VAIHDETTU!");
             })
         }
     });
 
-    export const { luokanPoistoDialog, budjetinPoistoDialog, budjettiRivinPoistoDialog } = budjettiSlice.actions;
+    export const { luokanPoistoDialog, budjetinPoistoDialog, budjettiRivinPoistoDialog, asetuksetDialog } = budjettiSlice.actions;
     export default budjettiSlice.reducer;
-
-
-
-    // Poista taulut
-    /*tx.executeSql(`
-    DROP TABLE IF EXISTS budjetit
-    `)
-    tx.executeSql(`
-    DROP TABLE IF EXISTS luokat
-    `)
-    tx.executeSql(`
-    DROP TABLE IF EXISTS budjetti
-    `)*/
-
-    
-
-    // Esimerkkidataa tauluihin
-    /*tx.executeSql(`INSERT INTO budjetit (nimi)
-    VALUES
-      ("Eka Budjetti"),
-      ("Toka Budjetti"),
-      ("Kolmas Budjetti")
-      `)
-
-    tx.executeSql(`INSERT INTO luokat (nimi)
-    VALUES
-      ("Ruoka"),
-      ("Asumiskulut"),
-      ("Auto")
-      `)
-    tx.executeSql(`INSERT INTO budjetti (nimi, budjetitId, luokkaId, arvio, toteuma)
-    VALUES
-      ("Maito", 1, 1, 20.50, 10),
-      ("Vuokra", 1, 2, 850, 840),
-      ("Bensa", 2, 3, 260, 220.80),
-      ("Renkaat",3,3,700,650),
-      ("Sähkö",2,2,150,240.80),
-      ("Hesburger",2,1,20,14.30)
-      `)*/
-    
-    // Tulostaa taulujen sisällöt  
-    /*tx.executeSql(`SELECT * FROM budjetit`, [],
-    (_tx : SQLite.SQLTransaction, rs : SQLite.SQLResultSet) => {
-      console.log(rs.rows._array);
-    })
-    tx.executeSql(`SELECT * FROM luokat`, [],
-    (_tx : SQLite.SQLTransaction, rs : SQLite.SQLResultSet) => {
-      console.log(rs.rows._array);
-    })
-    tx.executeSql(`SELECT * FROM budjetti`, [],
-    (_tx : SQLite.SQLTransaction, rs : SQLite.SQLResultSet) => {
-      console.log(rs.rows._array);
-    })*/

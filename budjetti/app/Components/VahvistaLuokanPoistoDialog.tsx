@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, StyleSheet } from 'react-native';
-import { Button, Dialog, Portal, PaperProvider, Text } from 'react-native-paper';
+import { Button, Dialog, Portal, Text } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 import { haeTaulut, luokanPoistoDialog, poistaLuokka } from '../../Redux/budjettiSlice';
 import { AppDispatch, RootState } from '../../Redux/store';
@@ -16,7 +16,7 @@ const dialogAuki = useSelector((state : RootState) => state.budjetit.luokanPoist
 const luokat =  useSelector((state : RootState) => state.budjetit.luokat)
 const dispatch = useDispatch<AppDispatch>();
 
-const nimi : string = luokat.find((luokka : {id : number, nimi : string}) => {
+const nimi : string | undefined = luokat.find((luokka : {id : number, nimi : string}) => {
     return luokka.id === props.id;
 })?.nimi;
 

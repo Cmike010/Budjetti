@@ -1,13 +1,11 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react'
-import {Picker} from '@react-native-picker/picker';
+import React, { useEffect, useState } from 'react'
 import { Dropdown } from 'react-native-element-dropdown';
 import { View, StyleSheet } from 'react-native';
-import { TextInput, Text, Button } from 'react-native-paper';
+import { TextInput, Text, Button, useTheme } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../Redux/store';
 import { haeTaulut, tallennaBudjettiRivi } from '../../Redux/budjettiSlice';
-import VahvistaPoistoDialog from './VahvistaLuokanPoistoDialog';
 
 interface Value {
 
@@ -20,7 +18,6 @@ interface Value {
 
 const LisaaRiviBudjettiin : React.FC = () : React.ReactElement => {
 
-  console.log("RENDER")
     const taulut =  useSelector((state : RootState) => state.budjetit)
     const dispatch = useDispatch<AppDispatch>();
 
@@ -34,13 +31,12 @@ const LisaaRiviBudjettiin : React.FC = () : React.ReactElement => {
                                           virhe : []
                                           })
 
-
-    
     const [value, setValue] = useState<string | null>("Valitse...");
+
+    const theme = useTheme();
 
     useEffect(() => {
 
-      console.log(values)
     },[values])
 
     const data = (() : {label : string, value : string}[] => {
@@ -61,19 +57,19 @@ const LisaaRiviBudjettiin : React.FC = () : React.ReactElement => {
 
       let apuVirhe = []
 
-      let uusiBudjettiRivi : {nimi : string, budjettiId : string|undefined, luokkaId : {id : string, nimi : string}, arvio : number, toteuma : number} = {
+      let uusiBudjettiRivi : {nimi : string, budjettiId : string|undefined, luokkaId : {id : string, nimi : string}, arvio : number, toteuma : number | undefined} = {
         nimi : "",
         budjettiId : id,
         luokkaId : {id : "", nimi : ""},
         arvio : NaN,
-        toteuma : NaN
+        toteuma : undefined
 }
 
       if (!values.nimi){
         apuVirhe.push("Syötä nimi!")
       }
       if (!values.arvio){
-        apuVirhe.push("Syötä arvio!")
+        apuVirhe.push("Syötä arvio numeroina!")
       }
 
       if (!values.toteuma){
@@ -85,7 +81,6 @@ const LisaaRiviBudjettiin : React.FC = () : React.ReactElement => {
       }
 
       if (apuVirhe.length > 0){
-        console.log(apuVirhe)
         setValues({...values, virhe : apuVirhe})
       }
 
@@ -103,8 +98,6 @@ const LisaaRiviBudjettiin : React.FC = () : React.ReactElement => {
         if (uusiBudjettiRivi.luokkaId.id != "1"){
           uusiBudjettiRivi = {...uusiBudjettiRivi, luokkaId : {id : values.luokka.id, nimi : values.luokka.nimi} }
         }
-        console.log("Lisätään uusi rivi...")
-        console.log(uusiBudjettiRivi)
 
         setValues({
           nimi : "",
@@ -117,11 +110,6 @@ const LisaaRiviBudjettiin : React.FC = () : React.ReactElement => {
         dispatch(tallennaBudjettiRivi(uusiBudjettiRivi));
         dispatch(haeTaulut());
 
-      /*router.replace({
-        pathname: "/Components/[Id]BudjetinTarkastelu",
-        params: { id : id }
-      })*/
-
       router.dismiss(1);
       }
     }
@@ -130,39 +118,33 @@ const LisaaRiviBudjettiin : React.FC = () : React.ReactElement => {
 
       router.push({
         pathname: "/Components/[Id]MuokkaaLuokkia",
-        //params: { id : id }
       })
     }
 
   return (
     <View>
-        <Text>{id}</Text>
         {(Boolean(values.virhe.length > 0))
         ? values.virhe.map((virhe : string, idx : number) => {
           return (
-         <Text key={idx} variant='displayLarge'>{virhe}</Text>
+         <Text key={idx} variant='headlineMedium' style={{ color : theme.colors.error}}>{virhe}</Text>
           )})
         : null
         }
         <TextInput
           style={styles.textInputs}
           label={"Nimi..."}
-          //placeholder='Nimi...'
           onChangeText={newValue => setValues({ ...values, nimi : newValue })}
-          //outlineColor='#F0F8FF'
           mode='outlined'
         />
         <TextInput
           style={styles.textInputs}
           label={"Arvio..."}
-          //placeholder='0'
           onChangeText={newValue => setValues({ ...values, arvio : Number(newValue) })}
           mode='outlined'
         />
         <TextInput
           style={styles.textInputs}
           label={"Toteuma..."}
-          //placeholder='0'
           onChangeText={newValue => setValues({ ...values, toteuma : Number(newValue) })}
           mode='outlined'
         />
@@ -186,7 +168,6 @@ const LisaaRiviBudjettiin : React.FC = () : React.ReactElement => {
               />
         <Button style={styles.button} mode='contained' onPress={lisaaRivi}>Lisää rivi</Button>
         <Button style={styles.button} mode='contained' onPress={muokkaaLuokkia}>Muokkaa luokkia</Button>
-        
     </View>
   )
 }
@@ -217,7 +198,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   button: {
-    margin : 5
+    marginTop : 10,
+    width : 300,
+    alignSelf : "center",
+    borderColor : "black",
+    borderWidth : 1
   }
 })
 export default LisaaRiviBudjettiin;

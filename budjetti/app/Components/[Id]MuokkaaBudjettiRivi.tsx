@@ -1,13 +1,11 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react'
-import {Picker} from '@react-native-picker/picker';
+import React, { useState } from 'react'
 import { Dropdown } from 'react-native-element-dropdown';
 import { View, StyleSheet } from 'react-native';
 import { TextInput, Text, Button } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../Redux/store';
-import { haeTaulut, tallennaBudjettiRivi, paivitaBudjettiRivi, budjettiRivinPoistoDialog } from '../../Redux/budjettiSlice';
-import VahvistaPoistoDialog from './VahvistaLuokanPoistoDialog';
+import { haeTaulut, paivitaBudjettiRivi, budjettiRivinPoistoDialog } from '../../Redux/budjettiSlice';
 import VahvistaBudjettiRivinPoistoDialog from './VahvistaBudjettiRivinPoistoDialog';
 
 
@@ -17,7 +15,7 @@ const MuokkaaBudjettiRivi : React.FC = () : React.ReactElement => {
     const taulut =  useSelector((state : RootState) => state.budjetit)
     const dispatch = useDispatch<AppDispatch>();
 
-    const [values, setValues] = useState<{arvio : number, budjetitId : number, id : number, luokkaId : number | string, nimi : string, toteuma : number}>(taulut.budjetti.find((item : any) => Number(id) === item.id));
+    const [values, setValues] = useState<Budjetti | undefined>(taulut?.budjetti?.find((item : Budjetti) => Number(id) === item.id) || undefined);
 
     const [virhe, setVirhe] = useState({})
 
@@ -31,18 +29,20 @@ const MuokkaaBudjettiRivi : React.FC = () : React.ReactElement => {
         })();
 
     const vaihda = (item : {value : string, label : string}) => {
-        setValues({...values, luokkaId : item.value});
-        }
+        if (values) {
+          setValues({ ...values, luokkaId: item.value });
+      } 
+      }
 
     const muokkaa = () => {
 
       let apuVirhe = {}
         setVirhe({})
-        if (values.nimi.length <= 0){
+        if (values!.nimi.length <= 0){
           apuVirhe = {...apuVirhe, nimi : "Syötä nimi!"}
         }
 
-        if (!values.arvio){
+        if (!values!.arvio){
           apuVirhe = {...apuVirhe, arvio : "Syötä arvio!"}
         }
 
@@ -60,7 +60,6 @@ const MuokkaaBudjettiRivi : React.FC = () : React.ReactElement => {
 
   return (
     <View>
-        <Text>{id}</Text>
         {(Boolean(virhe))
         ? Object.entries(virhe).map(([key, value], idx : number) => {
           return (
@@ -71,26 +70,28 @@ const MuokkaaBudjettiRivi : React.FC = () : React.ReactElement => {
         <TextInput
           style={styles.textInputs}
           label={"Nimi..."}
-          defaultValue={values.nimi}
-          //placeholder='Nimi...'
-          onChangeText={newValue => setValues({ ...values, nimi : newValue })}
-          //outlineColor='#F0F8FF'
+          defaultValue={values!.nimi}
+          onChangeText={newValue => {
+            if (values){
+            setValues({ ...values, nimi : newValue })}}}
           mode='outlined'
         />
         <TextInput
           style={styles.textInputs}
           label={"Arvio..."}
-          defaultValue={String(values.arvio)}
-          //placeholder='0'
-          onChangeText={newValue => setValues({ ...values, arvio : Number(newValue) })}
+          defaultValue={String(values!.arvio)}
+          onChangeText={newValue => {
+            if (values){
+            setValues({ ...values, arvio : Number(newValue) })}}}
           mode='outlined'
         />
         <TextInput
           style={styles.textInputs}
           label={"Toteuma..."}
-          defaultValue={String(values.toteuma)}
-          //placeholder='0'
-          onChangeText={newValue => setValues({ ...values, toteuma : Number(newValue) })}
+          defaultValue={String(values!.toteuma)}
+          onChangeText={newValue => {
+            if (values){
+            setValues({ ...values, toteuma : Number(newValue) })}}}
           mode='outlined'
         />
         <Dropdown
@@ -104,14 +105,14 @@ const MuokkaaBudjettiRivi : React.FC = () : React.ReactElement => {
                 maxHeight={300}
                 labelField={"label"}
                 valueField="value"
-                placeholder={taulut.luokat.find((luokka : {id : number, nimi : string}) => values.luokkaId == luokka.id)?.nimi}
+                placeholder={taulut.luokat.find((luokka : {id : number, nimi : string}) => values!.luokkaId == luokka.id)?.nimi}
                 searchPlaceholder="Search..."
-                value={String(values.id)}
+                value={String(values!.id)}
                 onChange={item => {
                   vaihda(item);
                 }}
               />
-        <Button style={styles.button} mode='contained' onPress={muokkaa}>Muokkaa</Button>
+        <Button style={styles.button} mode='contained' onPress={muokkaa}>Vahvista muutokset</Button>
         <Button style={styles.button} mode='contained' onPress={router.back}>Takaisin</Button>
         <Button mode="contained" style={styles.buttonDanger} onPress={() => dispatch(budjettiRivinPoistoDialog(true))}>Poista tämä rivi</Button>
         {(Boolean(budjettiRivinPoistoDialog))
@@ -151,12 +152,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   button: {
-    margin : 5
+    margin : 5,
+    width : 300,
+    alignSelf : "center",
+      borderColor : "black",
+      borderWidth : 1
   },
   buttonDanger: {
     backgroundColor : "red",
     margin : 5,
-    marginTop : 20
+    marginTop : 20,
+    width : 300,
+    alignSelf : "center",
+      borderColor : "black",
+      borderWidth : 1
   }
 })
 export default MuokkaaBudjettiRivi;

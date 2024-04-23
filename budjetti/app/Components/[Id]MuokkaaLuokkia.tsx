@@ -1,14 +1,10 @@
-import { router, useLocalSearchParams } from 'expo-router';
-import CheckBox from './CheckBox';
-import React, { useEffect, useRef, useState } from 'react';
-import {Picker} from '@react-native-picker/picker';
+import { router } from 'expo-router';
+import React, { useState } from 'react';
 import { Dropdown } from 'react-native-element-dropdown';
 import { View, StyleSheet } from 'react-native';
-import { TextInput, Text, Button, useTheme } from 'react-native-paper';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../Redux/store';
-import { haeTaulut, tallennaBudjettiRivi } from '../../Redux/budjettiSlice';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
+import { Text, Button, useTheme } from 'react-native-paper';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../Redux/store';
 
 interface Value {
   id : number
@@ -19,7 +15,6 @@ interface Value {
 const MuokkaaLuokkia : React.FC = () : React.ReactElement => {
 
     const luokat =  useSelector((state : RootState) => state.budjetit.luokat)
-    const dispatch = useDispatch<AppDispatch>();
 
     const theme = useTheme()
 
@@ -33,7 +28,6 @@ const MuokkaaLuokkia : React.FC = () : React.ReactElement => {
       const apuData : {label : string, value : string}[] = []
 
       luokat.map((luokka : any) => {
-        console.log("Nimi: " + luokka.nimi + " Id: " +luokka.id)
         if (luokka.nimi !== "Ei valittu"){
         apuData.push({label : luokka.nimi, value : luokka.id})
         }
@@ -47,7 +41,6 @@ const [value, setValue] = useState<string | null>("");
 
     const vaihda = (item : {value : string, label : string}) => {
       setValue(item.value);
-      console.log("Vaihda nimi: " + item.label + " ja Id: " + item.value)
       setValues({...values, id : Number(item.value), nimi : item.label})
     }
 
@@ -55,7 +48,6 @@ const lisaaLuokka = () => {
 
     router.push({
         pathname: "/Components/[Id]LisaaLuokka",
-        //params: { id : values.id }
       })
 }
 
@@ -108,18 +100,12 @@ const styles = StyleSheet.create({
       marginHorizontal: 16,
       marginVertical: 32,
     },
-    section: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    paragraph: {
-      fontSize: 15,
-    },
-    checkbox: {
-      margin: 8,
-    },
     button: {
-        margin : 5
+        margin : 5,
+        width : 300,
+        alignSelf : "center",
+        borderColor : "black",
+        borderWidth : 1
       },
       dropdown: {
         margin: 16,

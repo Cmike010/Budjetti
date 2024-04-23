@@ -1,12 +1,13 @@
-import { Stack, Tabs } from "expo-router";
-import { StyleSheet, Text, View } from 'react-native';
+import { Stack } from "expo-router";
 import { Provider } from "react-redux";
-import { AppDispatch, store } from '../Redux/store';
+import { store } from '../Redux/store';
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import BudjetinTarkastelu from "./Components/[Id]BudjetinTarkastelu";
 import { PaperProvider } from "react-native-paper";
+import Ratas from "./Components/Ratas";
+
 
 const RootLayout = () => {
+
   return (
     <Provider store={store}>
         <SafeAreaProvider>
@@ -14,9 +15,12 @@ const RootLayout = () => {
             <Stack
               screenOptions={{
                 headerStyle: {
-                  backgroundColor: '#f0511e',
+                  backgroundColor: '#3d84f5',
                 },
-                headerTintColor : '#fff',
+                headerRight : () => 
+                <Ratas/>
+                ,
+                headerTintColor : 'white',
                 headerTitleStyle: {
                   fontWeight : 'bold',
                 },
@@ -25,7 +29,8 @@ const RootLayout = () => {
               <Stack.Screen
                   name="index"
                   options={{
-                    headerTitle: "Budjetit"
+                    headerTitle: "Budjetit",
+                    
                   }}
               />
               <Stack.Screen
@@ -76,14 +81,5 @@ const RootLayout = () => {
     </Provider>
   );
 };
-
-const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: '#fff',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-  });
 
 export default RootLayout;

@@ -1,8 +1,8 @@
 import React from 'react'
 import { View, StyleSheet } from 'react-native';
-import { Button, Dialog, Portal, PaperProvider, Text } from 'react-native-paper';
+import { Button, Dialog, Portal, Text } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
-import { budjetinPoistoDialog, haeTaulut, luokanPoistoDialog, poistaBudjetti, poistaLuokka } from '../../Redux/budjettiSlice';
+import { budjetinPoistoDialog, haeTaulut, poistaBudjetti } from '../../Redux/budjettiSlice';
 import { AppDispatch, RootState } from '../../Redux/store';
 import { router } from 'expo-router';
 
@@ -16,7 +16,7 @@ const dialogAuki = useSelector((state : RootState) => state.budjetit.budjetinPoi
 const budjetit =  useSelector((state : RootState) => state.budjetit.budjetit)
 const dispatch = useDispatch<AppDispatch>();
 
-const nimi : string = budjetit.find((budjetti : {id : number, nimi : string}) => {
+const nimi : string | undefined= budjetit.find((budjetti : {id : number, nimi : string}) => {
     return budjetti.id === props.id;
 })?.nimi;
 
@@ -25,7 +25,6 @@ dispatch(poistaBudjetti(props.id));
 dispatch(haeTaulut());
 dispatch(budjetinPoistoDialog(false));
 router.dismiss(1)
-    
 }
 
 

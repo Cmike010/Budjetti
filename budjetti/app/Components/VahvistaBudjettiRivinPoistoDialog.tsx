@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { View, StyleSheet } from 'react-native';
-import { Button, Dialog, Portal, PaperProvider, Text } from 'react-native-paper';
+import { Button, Dialog, Portal, Text } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
-import { budjetinPoistoDialog, budjettiRivinPoistoDialog, haeTaulut, luokanPoistoDialog, poistaBudjetti, poistaBudjettiRivi, poistaLuokka } from '../../Redux/budjettiSlice';
+import { budjettiRivinPoistoDialog, haeTaulut, poistaBudjettiRivi } from '../../Redux/budjettiSlice';
 import { AppDispatch, RootState } from '../../Redux/store';
 import { router } from 'expo-router';
 
@@ -17,12 +17,14 @@ const budjetit = useSelector((state : RootState) => state.budjetit.budjetti);
 const dispatch = useDispatch<AppDispatch>();
 
 
-const [poistettava] = useState<Budjetti>(budjetit.find((budjetti : Budjetti) => Number(props.id) === budjetti.id));
+const [poistettava] = useState<Budjetti | undefined>(budjetit.find((budjetti : Budjetti) => Number(props.id) === budjetti.id) || undefined);
 
 const poista = () => {
+if (poistettava){
 dispatch(poistaBudjettiRivi(poistettava?.id))
 dispatch(haeTaulut());
 router.dismiss(1)
+}
 }
 
 

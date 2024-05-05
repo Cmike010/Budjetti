@@ -9,7 +9,7 @@ final school project and also as it would serve my personal needs by keeping tra
 - Add new classes
 - Modify & delete budgets or budget rows
 
-![Overview of main-screen](/budjetti/assets/index.jpg)
+<img src="/budjetti/assets/index.jpg" height=30%/>
 ![Image of budget rows](/budjetti/assets/budjetti.jpg)
 
 Application calculates budget rows and visualizes by colors if planned budget row is surplus or shortfall. 

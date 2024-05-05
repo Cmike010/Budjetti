@@ -1,21 +1,24 @@
-# Sovellusohjelmointi 3 oppimistehtävät -startteri
+# Budget application for mobile devices
 
-Tämä on repository Sovellusohjelmointi 3 -opintojakson oppimistehtävien palautukseen. Kaikki palautukset oppimistehtäviin tulee sijoittaa sitä vastaavaan GitHub-repositoryyn. Jokaiselle oppimistehtävälle luodaan uusi repository tehtävänannon yhteydessä olevasta linkistä.
+This application is made for users to help them plan any kind of budgets. Application was made as a 
+final school project and also as it would serve my personal needs by keeping track of planned costs vs real costs. For users it's possible to:
 
-## Käytön ja käyttöönoton ohjeet:
+- Add a budget
+- Add new rows to budget
+- Apply class for budget rows
+- Add new classes
+- Modify & delete budgets or budget rows
 
-1. Kloonaa repositorysi paikalliseksi omalle koneelleesi (git clone ``repositoryn_git-osoite``)
+![Overview of main-screen](/budjetti/assets/index.jpg)
+![Image of budget rows](/budjetti/assets/budjetti.jpg)
 
-2. Avaa kloonattu kansio Visual Studio Codella
+Application calculates budget rows and visualizes by colors if planned budget row is surplus or shortfall. 
 
-3. Avaa VS Coden sisään rakennettu komentokehote (Terminal) ja suorita tarvittavat npx- tai npm-komennot toimeksiannon mukaan. Luo uusi projekti siten, että projektin juurihakemisto on repositoryn juuressa (ei siis tarpeettomia alikansioita). Huomaathan, että uuden projektin luominen (mahdollisesti) uudelleennimeää tämän README.md-tiedoston -> README.old.md-tiedostoksi.
+## Techniques
 
-4. Toteuta sovellustasi ja ylläpidä repositoryjä Git-työkulun mukaisesti joko VS Coden Git-työkalulla tai erillisinä komentoina:
+Application was developed as a React Native Expo project. MySQLite works as a database in user's mobile device. Redux is used to take care of the
+global state management. Expo router is used to navigate between screens.
 
-- `git add .` (Lisää muutetut tiedostot paikalliseen repositoryyn)
-- `git commit -m "kommentti"` (Vahvistaa muutokset)
-- `git push origin main` (Siirtää muuttuneen repositoryn Githubiin)
+## Other
 
-5. Tehtävää palauttaessasi varmista, että koodistasi on viimeisin versio GitHubissa ja olet ilmoittanut repositoryn osoitteen myös raportissa.
-
-Voit soveltaa tätä repositorya kuten haluat. Voit tehdä oppimistehtävät suoraan repositoryyn tai voit tehdä koodausta muualla ja kopioida valmiit koodit tähän repositoryyn. Tärkeintä on, että koodit ovat opettajan luettavissa GitHubissa tehtäväraportin palautuksen yhteydessä.
+Application interface is only in Finnish. Application is not (and will not be) added to markets of Google or IOS.
